@@ -21,10 +21,12 @@ public class GitHubActivityServiceImpl implements GitHubActivityService {
 
 
     @Override
-    @Cacheable(value = "activityCache", key = "#username + '-' + #eventType")
+    @Cacheable(cacheNames = "activities", key = "#username + ':' + #eventType")
     public List<ActivityDTO> getActivity(String username, String eventType) throws JsonProcessingException {
         List<GitHubEvent> events = getActivityFromGitHub(username);
-
+        if (events == null) {
+            return List.of();
+        }
         return events.stream()
                 .filter(event -> eventType == null || eventType.isEmpty() ||
                         event.getType().equalsIgnoreCase(eventType))
